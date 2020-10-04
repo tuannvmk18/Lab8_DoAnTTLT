@@ -37,10 +37,6 @@ public class Student {
 
     @Override
     public String toString() {
-        return "Student{" +
-                "ID='" + ID + '\'' +
-                ", Name='" + Name + '\'' +
-                ", Major='" + Major + '\'' +
-                '}';
+        return this.ID + " - " + this.Name;
     }
 }

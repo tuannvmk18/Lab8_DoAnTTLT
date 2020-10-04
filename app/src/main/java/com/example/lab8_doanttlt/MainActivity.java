@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         button = (Button) findViewById(R.id.button);
         listview = (ListView) findViewById(R.id.listView);
         AddStudentFromFileCSV();
-
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, major);
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         spin.setAdapter(adapter);
@@ -58,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
                 if (!major.contains(value[2])) {
                     major.add(value[2]);
                 }
-                br.close();
             }
+            br.close();
         } catch (Exception e) {
             System.out.println("" + e.getMessage());
         }

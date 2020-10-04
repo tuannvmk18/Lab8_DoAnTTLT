@@ -1,19 +1,31 @@
 package com.example.lab8_doanttlt;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     Spinner spin;
@@ -22,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<String, Student> hashmap = new HashMap<String, Student>();
     private ArrayList<String> list = new ArrayList<String>();
     private ArrayList<String> major = new ArrayList<String>();
-
+    private static final String TAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
         spin = (Spinner) findViewById(R.id.spinnerMajor);
         button = (Button) findViewById(R.id.button);
         listview = (ListView) findViewById(R.id.listView);
-        AddStudentFromFileCSV();
+//        AddStudentFromFileCSV();
+        AddStudentFromFirebase();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, major);
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         spin.setAdapter(adapter);
@@ -61,6 +74,35 @@ public class MainActivity extends AppCompatActivity {
             br.close();
         } catch (Exception e) {
             System.out.println("" + e.getMessage());
+        }
+    }
+
+    public void AddStudentFromFirebase() {
+        try {
+            FirebaseFirestore.setLoggingEnabled(true);
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            CollectionReference doc = db.collection("DoAnTTLT");
+
+            major.add("All");
+            doc.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if(task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Map<String, Object> st = document.getData();
+                            hashmap.put(st.get("ID").toString(), new Student(st.get("ID").toString(), st.get("Name").toString(), st.get("Major").toString()));
+                            if (!major.contains(st.get("Major").toString())) {
+                                major.add(st.get("Major").toString());
+                            }
+                        }
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                }
+            });
+
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
